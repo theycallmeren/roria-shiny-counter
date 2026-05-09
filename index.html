@@ -9,16 +9,20 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
   <style>
     @keyframes float {
       0% { transform: translateY(0px); }
-      50% { transform: translateY(-12px); }
+      50% { transform: translateY(-10px); }
       100% { transform: translateY(0px); }
+    }
+
+    @keyframes glow {
+      0% { filter: drop-shadow(0 0 10px gold); }
+      50% { filter: drop-shadow(0 0 25px hotpink); }
+      100% { filter: drop-shadow(0 0 10px cyan); }
     }
 
     @keyframes sparkle {
@@ -34,20 +38,6 @@
       100% {
         transform: scale(1.4) rotate(180deg);
         opacity: 0;
-      }
-    }
-
-    @keyframes glow {
-      0% {
-        filter: drop-shadow(0 0 10px gold);
-      }
-
-      50% {
-        filter: drop-shadow(0 0 30px hotpink);
-      }
-
-      100% {
-        filter: drop-shadow(0 0 10px cyan);
       }
     }
 
@@ -73,7 +63,7 @@
     }
 
     .sparkle:nth-child(2) {
-      top: 30%;
+      top: 25%;
       right: 15%;
       animation-delay: 0.5s;
     }
@@ -85,7 +75,7 @@
     }
 
     .sparkle:nth-child(4) {
-      bottom: 10%;
+      bottom: 15%;
       right: 20%;
       animation-delay: 1.5s;
     }
@@ -112,8 +102,6 @@ function ShinyCounter() {
     return Number(localStorage.getItem('rc-phase')) || 1
   })
 
-  const [theme, setTheme] = React.useState('dark')
-
   const [showShinySprite, setShowShinySprite] =
     React.useState(true)
 
@@ -131,9 +119,6 @@ function ShinyCounter() {
 
   const [isRoaming, setIsRoaming] =
     React.useState(false)
-
-  const [showSparkles, setShowSparkles] =
-    React.useState(true)
 
   React.useEffect(() => {
     localStorage.setItem(
@@ -158,6 +143,7 @@ function ShinyCounter() {
 
   function getOdds() {
 
+    // STATIC
     if (!isRoaming) {
 
       if (
@@ -176,20 +162,24 @@ function ShinyCounter() {
         weekendBoost
       ) return 85
 
-      if (shinyROPower) return 128
+      if (shinyROPower)
+        return 128
 
       if (
         shinyCharm &&
         weekendBoost
       ) return 683
 
-      if (shinyCharm) return 1024
+      if (shinyCharm)
+        return 1024
 
-      if (weekendBoost) return 1365
+      if (weekendBoost)
+        return 1365
 
       return 2048
     }
 
+    // ROAMING + LEGENDARY RO POWER
     if (legendaryROPower) {
 
       if (
@@ -208,19 +198,53 @@ function ShinyCounter() {
         weekendBoost
       ) return 21333
 
-      if (shinyROPower) return 32000
+      if (shinyROPower)
+        return 32000
 
       if (
         shinyCharm &&
         weekendBoost
       ) return 170667
 
-      if (shinyCharm) return 256000
+      if (shinyCharm)
+        return 256000
 
-      if (weekendBoost) return 341333
+      if (weekendBoost)
+        return 341333
 
       return 512000
     }
+
+    // ROAMING
+    if (
+      shinyCharm &&
+      shinyROPower &&
+      weekendBoost
+    ) return 42667
+
+    if (
+      shinyCharm &&
+      shinyROPower
+    ) return 64000
+
+    if (
+      shinyROPower &&
+      weekendBoost
+    ) return 85333
+
+    if (shinyROPower)
+      return 128000
+
+    if (
+      shinyCharm &&
+      weekendBoost
+    ) return 682667
+
+    if (shinyCharm)
+      return 1024000
+
+    if (weekendBoost)
+      return 1365333
 
     return 2048000
   }
@@ -242,15 +266,19 @@ function ShinyCounter() {
       100
     )
 
+  const formattedName =
+    pokemonName
+      .toLowerCase()
+      .replace(/ /g, '')
+      .replace('.', '')
+      .replace("'", '')
+
   const spriteUrl = showShinySprite
-    ? `https://play.pokemonshowdown.com/sprites/ani-shiny/${pokemonName.toLowerCase().replace(/ /g, '-')}.gif`
-    : `https://play.pokemonshowdown.com/sprites/ani/${pokemonName.toLowerCase().replace(/ /g, '-')}.gif`
+    ? `https://play.pokemonshowdown.com/sprites/ani-shiny/${formattedName}.gif`
+    : `https://play.pokemonshowdown.com/sprites/ani/${formattedName}.gif`
 
   function incrementEncounter() {
-
     setEncounters((e) => e + 1)
-
-    navigator.vibrate?.(50)
   }
 
   function shinySimulator() {
@@ -264,31 +292,25 @@ function ShinyCounter() {
 
       alert('✨ SHINY FOUND ✨')
 
-      navigator.vibrate?.([100, 50, 100])
-
     } else {
 
-      alert('No shiny this time.')
+      alert('No shiny this encounter.')
     }
   }
 
   return (
 
-    <div className={
-      theme === 'dark'
-      ? 'min-h-screen bg-black text-white flex items-center justify-center p-6'
-      : 'min-h-screen bg-white text-black flex items-center justify-center p-6'
-    }>
+    <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
 
-      <div className="w-full max-w-5xl bg-zinc-900 rounded-3xl shadow-2xl border border-zinc-700 p-8 relative overflow-hidden">
+      <div className="w-full max-w-5xl bg-zinc-900 border border-zinc-700 rounded-3xl shadow-2xl p-8 relative overflow-hidden">
 
         <div className="text-center mb-8">
 
-          <h1 className="text-5xl font-black mb-3 animate-pulse">
+          <h1 className="text-5xl font-black animate-pulse">
             ✨ Roria Conquest Shiny Counter ✨
           </h1>
 
-          <p className="text-zinc-400">
+          <p className="text-zinc-400 mt-2">
             Animated Shiny Hunting Tracker
           </p>
 
@@ -296,12 +318,12 @@ function ShinyCounter() {
 
         <div className="relative flex justify-center items-center mb-8">
 
-          {showSparkles && showShinySprite && (
+          {showShinySprite && (
             <>
               <div className="sparkle">✨</div>
               <div className="sparkle">⭐</div>
-              <div className="sparkle">✨</div>
               <div className="sparkle">💫</div>
+              <div className="sparkle">✨</div>
             </>
           )}
 
@@ -396,50 +418,6 @@ function ShinyCounter() {
 
         </div>
 
-        <div className="flex gap-3 mb-6">
-
-          <button
-            onClick={() =>
-              setShowShinySprite(
-                !showShinySprite
-              )
-            }
-            className="
-              flex-1
-              bg-yellow-500
-              hover:bg-yellow-400
-              transition
-              rounded-2xl
-              py-4
-              font-bold
-              text-black
-            "
-          >
-            Toggle Shiny Sprite
-          </button>
-
-          <button
-            onClick={() =>
-              setShowSparkles(
-                !showSparkles
-              )
-            }
-            className="
-              flex-1
-              bg-cyan-500
-              hover:bg-cyan-400
-              transition
-              rounded-2xl
-              py-4
-              font-bold
-              text-black
-            "
-          >
-            Sparkles
-          </button>
-
-        </div>
-
         <button
           onClick={() =>
             setIsRoaming(!isRoaming)
@@ -457,6 +435,28 @@ function ShinyCounter() {
           {isRoaming
             ? 'Roaming Legendary Mode'
             : 'Static Encounter Mode'}
+        </button>
+
+        <button
+          onClick={() =>
+            setShowShinySprite(
+              !showShinySprite
+            )
+          }
+          className="
+            w-full
+            bg-yellow-500
+            hover:bg-yellow-400
+            transition
+            rounded-2xl
+            py-4
+            text-xl
+            font-bold
+            text-black
+            mb-6
+          "
+        >
+          Toggle Shiny Sprite
         </button>
 
         <div className="w-full bg-zinc-700 rounded-full h-5 overflow-hidden mb-8">
@@ -562,7 +562,7 @@ function ShinyCounter() {
 
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex gap-3 mb-6">
 
           <button
             onClick={() =>
@@ -605,7 +605,6 @@ function ShinyCounter() {
           onClick={shinySimulator}
           className="
             w-full
-            mt-6
             bg-green-500
             hover:bg-green-400
             transition
