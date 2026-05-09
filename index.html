@@ -1,183 +1,237 @@
-import React from 'react'
+<!DOCTYPE html>
 
-export default function ShinyCounter() {
-  const [encounters, setEncounters] = React.useState(() => {
-    const saved = localStorage.getItem('rc-encounters')
-    return saved ? Number(saved) : 0
-  })
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-  const [pokemonName, setPokemonName] = React.useState(() => {
-    return localStorage.getItem('rc-pokemon') || 'Tapu Lele'
-  })
+  <title>Roria Shiny Counter</title>
 
-  const [weekendBoost, setWeekendBoost] = React.useState(true)
-  const [shinyCharm, setShinyCharm] = React.useState(true)
-  const [shinyROPower, setShinyROPower] = React.useState(false)
-  const [legendaryROPower, setLegendaryROPower] = React.useState(false)
-  const [isRoaming, setIsRoaming] = React.useState(false)
+  <script src="https://cdn.tailwindcss.com"></script>
 
-  React.useEffect(() => {
-    localStorage.setItem('rc-encounters', encounters)
-  }, [encounters])
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
 
-  React.useEffect(() => {
-    localStorage.setItem('rc-pokemon', pokemonName)
-  }, [pokemonName])
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 
-  function getOdds() {
-    if (!isRoaming) {
-      if (shinyCharm && shinyROPower && weekendBoost) return 43
-      if (shinyCharm && shinyROPower) return 64
-      if (shinyROPower && weekendBoost) return 85
-      if (shinyROPower) return 128
-      if (shinyCharm && weekendBoost) return 683
-      if (shinyCharm) return 1024
-      if (weekendBoost) return 1365
-      return 2048
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+</head>
+
+<body class="bg-black">
+  <div id="root"></div>
+
+  <script type="text/babel">
+
+    function App() {
+
+      const [encounters, setEncounters] = React.useState(() => {
+        const saved = localStorage.getItem("rc-encounters")
+        return saved ? Number(saved) : 0
+      })
+
+      const [pokemonName, setPokemonName] = React.useState(() => {
+        return localStorage.getItem("rc-pokemon") || "Tapu Lele"
+      })
+
+      const [weekendBoost, setWeekendBoost] = React.useState(true)
+      const [shinyCharm, setShinyCharm] = React.useState(true)
+      const [shinyROPower, setShinyROPower] = React.useState(false)
+      const [legendaryROPower, setLegendaryROPower] = React.useState(false)
+      const [isRoaming, setIsRoaming] = React.useState(false)
+
+      React.useEffect(() => {
+        localStorage.setItem("rc-encounters", encounters)
+      }, [encounters])
+
+      React.useEffect(() => {
+        localStorage.setItem("rc-pokemon", pokemonName)
+      }, [pokemonName])
+
+      function getOdds() {
+
+        if (!isRoaming) {
+          if (shinyCharm && shinyROPower && weekendBoost) return 43
+          if (shinyCharm && shinyROPower) return 64
+          if (shinyROPower && weekendBoost) return 85
+          if (shinyROPower) return 128
+          if (shinyCharm && weekendBoost) return 683
+          if (shinyCharm) return 1024
+          if (weekendBoost) return 1365
+          return 2048
+        }
+
+        if (legendaryROPower) {
+          if (shinyCharm && shinyROPower && weekendBoost) return 10667
+          if (shinyCharm && shinyROPower) return 16000
+          if (shinyROPower && weekendBoost) return 21333
+          if (shinyROPower) return 32000
+          if (shinyCharm && weekendBoost) return 170667
+          if (shinyCharm) return 256000
+          if (weekendBoost) return 341333
+          return 512000
+        }
+
+        if (shinyCharm && shinyROPower && weekendBoost) return 42667
+        if (shinyCharm && shinyROPower) return 64000
+        if (shinyROPower && weekendBoost) return 85333
+        if (shinyROPower) return 128000
+        if (shinyCharm && weekendBoost) return 682667
+        if (shinyCharm) return 1024000
+        if (weekendBoost) return 1365333
+
+        return 2048000
+      }
+
+      const odds = getOdds()
+
+      const probability =
+        1 - Math.pow((odds - 1) / odds, encounters)
+
+      const percent = (probability * 100).toFixed(2)
+
+      function Toggle({ enabled, setEnabled, label }) {
+        return (
+          <button
+            onClick={() => setEnabled(!enabled)}
+            className={
+              "w-full rounded-2xl p-4 text-left transition border " +
+              (enabled
+                ? "bg-pink-600 border-pink-400"
+                : "bg-zinc-800 border-zinc-700 hover:bg-zinc-700")
+            }
+          >
+            <div className="flex items-center justify-between">
+              <span className="font-semibold">{label}</span>
+              <span>{enabled ? "ON" : "OFF"}</span>
+            </div>
+          </button>
+        )
+      }
+
+      return (
+        <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
+
+          <div className="w-full max-w-2xl bg-zinc-900 rounded-3xl shadow-2xl p-8 border border-zinc-700">
+
+            <div className="text-center mb-8">
+              <h1 className="text-4xl font-bold animate-pulse">
+                ✨ Roria Conquest Shiny Counter ✨
+              </h1>
+
+              <p className="text-zinc-400 mt-2">
+                Dynamic shiny odds calculator
+              </p>
+
+              <input
+                value={pokemonName}
+                onChange={(e) => setPokemonName(e.target.value)}
+                placeholder="Pokémon Name"
+                className="w-full mt-6 bg-zinc-800 border border-zinc-700 rounded-2xl px-4 py-3 text-center text-lg"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-8">
+              <Toggle enabled={weekendBoost} setEnabled={setWeekendBoost} label="Weekend Boost" />
+              <Toggle enabled={shinyCharm} setEnabled={setShinyCharm} label="Shiny Charm" />
+              <Toggle enabled={shinyROPower} setEnabled={setShinyROPower} label="Shiny RO-Power" />
+              <Toggle enabled={legendaryROPower} setEnabled={setLegendaryROPower} label="Legendary RO-Power" />
+            </div>
+
+            <button
+              onClick={() => setIsRoaming(!isRoaming)}
+              className={
+                "w-full rounded-2xl py-4 text-xl font-bold transition mb-8 " +
+                (isRoaming
+                  ? "bg-yellow-600 hover:bg-yellow-500"
+                  : "bg-blue-600 hover:bg-blue-500")
+              }
+            >
+              {isRoaming ? "Roaming Legendary Mode" : "Static Encounter Mode"}
+            </button>
+
+            <div className="grid gap-4">
+
+              <div className="bg-zinc-800 rounded-2xl p-5 text-center">
+                <p className="text-zinc-400 text-sm">Current Odds</p>
+
+                <h2 className="text-3xl font-bold mt-2">
+                  1 / {odds.toLocaleString()}
+                </h2>
+              </div>
+
+              <div className="bg-zinc-800 rounded-2xl p-5 text-center">
+                <p className="text-zinc-400 text-sm">Current Hunt</p>
+
+                <h2 className="text-3xl font-bold mt-2">
+                  ✨ {pokemonName} ✨
+                </h2>
+              </div>
+
+              <div className="bg-zinc-800 rounded-2xl p-5 text-center">
+                <p className="text-zinc-400 text-sm">Encounters</p>
+
+                <h2 className="text-5xl font-bold mt-2">
+                  {encounters}
+                </h2>
+              </div>
+
+              <div className="bg-zinc-800 rounded-2xl p-5 text-center">
+                <p className="text-zinc-400 text-sm">
+                  Chance You Would Have Found It By Now
+                </p>
+
+                <h2 className="text-4xl font-bold mt-2">
+                  {percent}%
+                </h2>
+              </div>
+
+            </div>
+
+            <div className="flex gap-3 mt-8">
+
+              <button
+                onClick={() => setEncounters(encounters + 1)}
+                className="flex-1 bg-pink-600 hover:bg-pink-500 transition rounded-2xl py-4 text-xl font-bold"
+              >
+                +1 Encounter
+              </button>
+
+              <button
+                onClick={() =>
+                  setEncounters(Math.max(0, encounters - 1))
+                }
+                className="flex-1 bg-zinc-700 hover:bg-zinc-600 transition rounded-2xl py-4 text-xl font-bold"
+              >
+                -1
+              </button>
+
+            </div>
+
+            <button
+              onClick={() => setEncounters(0)}
+              className="w-full mt-4 bg-red-700 hover:bg-red-600 transition rounded-2xl py-4 text-lg font-bold"
+            >
+              Reset Counter
+            </button>
+
+            <div className="mt-8 text-sm text-zinc-500 text-center">
+              Probability uses cumulative odds and is not guaranteed.
+            </div>
+
+            <div className="mt-4 text-center text-zinc-600 text-sm">
+              Created by Ren • Discord: @they_call_me_ren • Instagram: @they_call_metarun
+            </div>
+
+          </div>
+
+        </div>
+      )
     }
 
-    if (legendaryROPower) {
-      if (shinyCharm && shinyROPower && weekendBoost) return 10667
-      if (shinyCharm && shinyROPower) return 16000
-      if (shinyROPower && weekendBoost) return 21333
-      if (shinyROPower) return 32000
-      if (shinyCharm && weekendBoost) return 170667
-      if (shinyCharm) return 256000
-      if (weekendBoost) return 341333
-      return 512000
-    }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />)
 
-    if (shinyCharm && shinyROPower && weekendBoost) return 42667
-    if (shinyCharm && shinyROPower) return 64000
-    if (shinyROPower && weekendBoost) return 85333
-    if (shinyROPower) return 128000
-    if (shinyCharm && weekendBoost) return 682667
-    if (shinyCharm) return 1024000
-    if (weekendBoost) return 1365333
-    return 2048000
-  }
+  </script>
 
-  const odds = getOdds()
+</body>
+</html>
 
-  const probability = 1 - Math.pow((odds - 1) / odds, encounters)
-  const percent = (probability * 100).toFixed(2)
-
-  const averageHours = ((encounters * 30) / 3600).toFixed(1)
-
-  function Toggle({ enabled, setEnabled, label }) {
-    return (
-      <button
-        onClick={() => setEnabled(!enabled)}
-        className={`w-full rounded-2xl p-4 text-left transition border ${
-          enabled
-            ? 'bg-pink-600 border-pink-400'
-            : 'bg-zinc-800 border-zinc-700 hover:bg-zinc-700'
-        }`}
-      >
-        <div className="flex items-center justify-between">
-          <span className="font-semibold">{label}</span>
-          <span>{enabled ? 'ON' : 'OFF'}</span>
-        </div>
-      </button>
-    )
-  }
-
-  return (
-    <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
-      <div className="w-full max-w-2xl bg-zinc-900 rounded-3xl shadow-2xl p-8 border border-zinc-700">
-        <div className="text-center space-y-2 mb-8">
-          <h1 className="text-4xl font-bold animate-pulse">✨ Roria Conquest Shiny Counter ✨</h1>
-          <p className="text-zinc-400">Dynamic shiny odds calculator</p>
-
-          <div className="mt-6">
-            <input
-              value={pokemonName}
-              onChange={(e) => setPokemonName(e.target.value)}
-              placeholder="Pokémon Name"
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-4 py-3 text-center text-lg outline-none focus:border-pink-500"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-8">
-          <Toggle enabled={weekendBoost} setEnabled={setWeekendBoost} label="Weekend Boost" />
-          <Toggle enabled={shinyCharm} setEnabled={setShinyCharm} label="Shiny Charm" />
-          <Toggle enabled={shinyROPower} setEnabled={setShinyROPower} label="Shiny RO-Power" />
-          <Toggle enabled={legendaryROPower} setEnabled={setLegendaryROPower} label="Legendary RO-Power" />
-        </div>
-
-        <button
-          onClick={() => setIsRoaming(!isRoaming)}
-          className={`w-full rounded-2xl py-4 text-xl font-bold transition mb-8 ${
-            isRoaming
-              ? 'bg-yellow-600 hover:bg-yellow-500'
-              : 'bg-blue-600 hover:bg-blue-500'
-          }`}
-        >
-          {isRoaming ? 'Roaming Legendary Mode' : 'Static Encounter Mode'}
-        </button>
-
-        <div className="grid grid-cols-1 gap-4">
-          <div className="bg-zinc-800 rounded-2xl p-5 text-center">
-            <p className="text-zinc-400 text-sm">Current Odds</p>
-            <h2 className="text-3xl font-bold mt-1">
-              1 / {odds.toLocaleString()}
-            </h2>
-          </div>
-
-          <div className="bg-zinc-800 rounded-2xl p-5 text-center">
-            <p className="text-zinc-400 text-sm">Current Hunt</p>
-            <h2 className="text-3xl font-bold mt-2">✨ {pokemonName} ✨</h2>
-          </div>
-
-          <div className="bg-zinc-800 rounded-2xl p-5 text-center">
-            <p className="text-zinc-400 text-sm">Encounters</p>
-            <h2 className="text-5xl font-bold mt-2">{encounters}</h2>
-          </div>
-
-          <div className="bg-zinc-800 rounded-2xl p-5 text-center">
-            <p className="text-zinc-400 text-sm">Chance You Would Have Found It By Now</p>
-            <h2 className="text-4xl font-bold mt-2">{percent}%</h2>
-          </div>
-
-          <div className="bg-zinc-800 rounded-2xl p-5 text-center">
-            <p className="text-zinc-400 text-sm">Estimated Hunt Time</p>
-            <h2 className="text-3xl font-bold mt-2">{averageHours} hrs</h2>
-            <p className="text-zinc-500 text-xs mt-1">Assuming ~30 seconds per encounter</p>
-          </div>
-        </div>
-
-        <div className="flex gap-3 mt-8">
-          <button
-            onClick={() => setEncounters(encounters + 1)}
-            className="flex-1 bg-pink-600 hover:bg-pink-500 transition rounded-2xl py-4 text-xl font-bold"
-          >
-            +1 Encounter
-          </button>
-
-          <button
-            onClick={() => setEncounters(Math.max(0, encounters - 1))}
-            className="flex-1 bg-zinc-700 hover:bg-zinc-600 transition rounded-2xl py-4 text-xl font-bold"
-          >
-            -1
-          </button>
-        </div>
-
-        <button
-          onClick={() => setEncounters(0)}
-          className="w-full mt-4 bg-red-700 hover:bg-red-600 transition rounded-2xl py-4 text-lg font-bold"
-        >
-          Reset Counter
-        </button>
-
-        <div className="mt-8 text-sm text-zinc-500 text-center">
-          Probability uses cumulative odds and is not guaranteed.
-        </div>
-
-        <div className="mt-4 text-center text-zinc-600 text-sm">
-          Created by Ren • Discord: @they_call_me_ren • Instagram: @they_call_metarun
-        </div>
-      </div>
-    </div>
-  )
-}
