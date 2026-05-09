@@ -258,7 +258,7 @@ function ShinyCounter() {
     )
 
   const percent =
-    (probability * 100).toFixed(2)
+    Math.min(probability * 100, 99.99).toFixed(2)
 
   const progress =
     Math.min(
@@ -505,9 +505,10 @@ function ShinyCounter() {
               Chance By Now
             </p>
 
-            <h2 className="text-4xl font-black mt-2">
-              {percent}%
-            </h2>
+           <h2 className="text-4xl font-black mt-2">
+  {percent}%
+  {Number(percent) >= 99.99 && <p className="text-sm text-zinc-400 font-normal mt-1">just reset bro 💀 please let her rest</p>}
+</h2>
 
           </div>
 
