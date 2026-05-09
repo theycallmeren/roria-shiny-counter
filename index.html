@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
   <title>Roria Conquest Shiny Counter</title>
@@ -13,6 +13,83 @@
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-12px); }
+      100% { transform: translateY(0px); }
+    }
+
+    @keyframes sparkle {
+      0% {
+        transform: scale(0.5) rotate(0deg);
+        opacity: 0;
+      }
+
+      50% {
+        opacity: 1;
+      }
+
+      100% {
+        transform: scale(1.4) rotate(180deg);
+        opacity: 0;
+      }
+    }
+
+    @keyframes glow {
+      0% {
+        filter: drop-shadow(0 0 10px gold);
+      }
+
+      50% {
+        filter: drop-shadow(0 0 30px hotpink);
+      }
+
+      100% {
+        filter: drop-shadow(0 0 10px cyan);
+      }
+    }
+
+    .float {
+      animation: float 2s ease-in-out infinite;
+    }
+
+    .glow {
+      animation: glow 2s infinite;
+    }
+
+    .sparkle {
+      position: absolute;
+      font-size: 24px;
+      animation: sparkle 2s infinite;
+      pointer-events: none;
+    }
+
+    .sparkle:nth-child(1) {
+      top: 10%;
+      left: 20%;
+      animation-delay: 0s;
+    }
+
+    .sparkle:nth-child(2) {
+      top: 30%;
+      right: 15%;
+      animation-delay: 0.5s;
+    }
+
+    .sparkle:nth-child(3) {
+      bottom: 20%;
+      left: 25%;
+      animation-delay: 1s;
+    }
+
+    .sparkle:nth-child(4) {
+      bottom: 10%;
+      right: 20%;
+      animation-delay: 1.5s;
+    }
+  </style>
 </head>
 
 <body class="bg-black">
@@ -38,19 +115,7 @@ function ShinyCounter() {
   const [theme, setTheme] = React.useState('dark')
 
   const [showShinySprite, setShowShinySprite] =
-    React.useState(false)
-
-  const [huntNotes, setHuntNotes] = React.useState('')
-
-  const [showGraph, setShowGraph] =
-    React.useState(false)
-
-  const [encounterHistory, setEncounterHistory] =
-    React.useState(() => {
-      return JSON.parse(
-        localStorage.getItem('rc-history')
-      ) || []
-    })
+    React.useState(true)
 
   const [weekendBoost, setWeekendBoost] =
     React.useState(true)
@@ -66,6 +131,9 @@ function ShinyCounter() {
 
   const [isRoaming, setIsRoaming] =
     React.useState(false)
+
+  const [showSparkles, setShowSparkles] =
+    React.useState(true)
 
   React.useEffect(() => {
     localStorage.setItem(
@@ -154,33 +222,6 @@ function ShinyCounter() {
       return 512000
     }
 
-    if (
-      shinyCharm &&
-      shinyROPower &&
-      weekendBoost
-    ) return 42667
-
-    if (
-      shinyCharm &&
-      shinyROPower
-    ) return 64000
-
-    if (
-      shinyROPower &&
-      weekendBoost
-    ) return 85333
-
-    if (shinyROPower) return 128000
-
-    if (
-      shinyCharm &&
-      weekendBoost
-    ) return 682667
-
-    if (shinyCharm) return 1024000
-
-    if (weekendBoost) return 1365333
-
     return 2048000
   }
 
@@ -201,31 +242,15 @@ function ShinyCounter() {
       100
     )
 
-  const spriteType =
-    showShinySprite
-      ? 'shiny'
-      : 'normal'
+  const spriteUrl = showShinySprite
+    ? `https://play.pokemonshowdown.com/sprites/ani-shiny/${pokemonName.toLowerCase().replace(/ /g, '-')}.gif`
+    : `https://play.pokemonshowdown.com/sprites/ani/${pokemonName.toLowerCase().replace(/ /g, '-')}.gif`
 
   function incrementEncounter() {
 
-    setEncounters((e) => {
+    setEncounters((e) => e + 1)
 
-      const next = e + 1
-
-      const updatedHistory = [
-        ...encounterHistory,
-        next
-      ]
-
-      setEncounterHistory(updatedHistory)
-
-      localStorage.setItem(
-        'rc-history',
-        JSON.stringify(updatedHistory)
-      )
-
-      return next
-    })
+    navigator.vibrate?.(50)
   }
 
   function shinySimulator() {
@@ -237,48 +262,14 @@ function ShinyCounter() {
 
     if (roll === 1) {
 
-      alert('✨ SHINY FOUND! ✨')
+      alert('✨ SHINY FOUND ✨')
+
+      navigator.vibrate?.([100, 50, 100])
 
     } else {
 
-      alert(
-        'No shiny this encounter...'
-      )
+      alert('No shiny this time.')
     }
-  }
-
-  function exportHuntCard() {
-
-    const text =
-`✨ ${pokemonName}
-${encounters.toLocaleString()} Encounters
-Phase ${phase}
-1 / ${odds.toLocaleString()} odds`
-
-    navigator.clipboard.writeText(text)
-
-    alert(
-      'Hunt card copied!'
-    )
-  }
-
-  function fakeCloudSave() {
-
-    const saveData = {
-      pokemonName,
-      encounters,
-      phase,
-      odds
-    }
-
-    localStorage.setItem(
-      'rc-cloud-save',
-      JSON.stringify(saveData)
-    )
-
-    alert(
-      'Cloud save backup created!'
-    )
   }
 
   return (
@@ -289,25 +280,123 @@ Phase ${phase}
       : 'min-h-screen bg-white text-black flex items-center justify-center p-6'
     }>
 
-      <div className="w-full max-w-4xl bg-zinc-900 rounded-3xl shadow-2xl p-8 border border-zinc-700">
+      <div className="w-full max-w-5xl bg-zinc-900 rounded-3xl shadow-2xl border border-zinc-700 p-8 relative overflow-hidden">
 
         <div className="text-center mb-8">
 
-          <h1 className="text-4xl font-bold animate-pulse">
+          <h1 className="text-5xl font-black mb-3 animate-pulse">
             ✨ Roria Conquest Shiny Counter ✨
           </h1>
 
-          <p className="text-zinc-400 mt-2">
-            Dynamic shiny odds calculator
+          <p className="text-zinc-400">
+            Animated Shiny Hunting Tracker
           </p>
 
+        </div>
+
+        <div className="relative flex justify-center items-center mb-8">
+
+          {showSparkles && showShinySprite && (
+            <>
+              <div className="sparkle">✨</div>
+              <div className="sparkle">⭐</div>
+              <div className="sparkle">✨</div>
+              <div className="sparkle">💫</div>
+            </>
+          )}
+
           <img
-            src={`https://img.pokemondb.net/sprites/home/${spriteType}/${pokemonName.toLowerCase().replace(/ /g, '-')}.png`}
-            className="w-40 h-40 mx-auto mt-4"
+            src={spriteUrl}
+            className="
+              w-56
+              h-56
+              object-contain
+              float
+              glow
+              relative
+              z-10
+            "
             onError={(e) => {
-              e.target.style.display = 'none'
+              e.target.src =
+                'https://play.pokemonshowdown.com/sprites/ani/pikachu.gif'
             }}
           />
+
+        </div>
+
+        <input
+          value={pokemonName}
+          onChange={(e) =>
+            setPokemonName(
+              e.target.value
+            )
+          }
+          placeholder="Pokémon Name"
+          className="
+            w-full
+            bg-zinc-800
+            border
+            border-zinc-700
+            rounded-2xl
+            px-4
+            py-4
+            text-center
+            text-xl
+            outline-none
+            focus:border-pink-500
+            mb-6
+          "
+        />
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+
+          <button
+            onClick={() =>
+              setWeekendBoost(!weekendBoost)
+            }
+            className="bg-pink-600 rounded-2xl p-4 font-bold"
+          >
+            Weekend
+            <br/>
+            {weekendBoost ? 'ON' : 'OFF'}
+          </button>
+
+          <button
+            onClick={() =>
+              setShinyCharm(!shinyCharm)
+            }
+            className="bg-pink-600 rounded-2xl p-4 font-bold"
+          >
+            Charm
+            <br/>
+            {shinyCharm ? 'ON' : 'OFF'}
+          </button>
+
+          <button
+            onClick={() =>
+              setShinyROPower(!shinyROPower)
+            }
+            className="bg-pink-600 rounded-2xl p-4 font-bold"
+          >
+            Shiny RO
+            <br/>
+            {shinyROPower ? 'ON' : 'OFF'}
+          </button>
+
+          <button
+            onClick={() =>
+              setLegendaryROPower(!legendaryROPower)
+            }
+            className="bg-pink-600 rounded-2xl p-4 font-bold"
+          >
+            Legend RO
+            <br/>
+            {legendaryROPower ? 'ON' : 'OFF'}
+          </button>
+
+        </div>
+
+        <div className="flex gap-3 mb-6">
 
           <button
             onClick={() =>
@@ -315,108 +404,65 @@ Phase ${phase}
                 !showShinySprite
               )
             }
-            className="mt-4 bg-yellow-500 hover:bg-yellow-400 transition rounded-2xl px-6 py-3 font-bold text-black"
+            className="
+              flex-1
+              bg-yellow-500
+              hover:bg-yellow-400
+              transition
+              rounded-2xl
+              py-4
+              font-bold
+              text-black
+            "
           >
-            {showShinySprite
-              ? 'Show Normal Sprite'
-              : 'Show Shiny Sprite'}
-          </button>
-
-          <input
-            value={pokemonName}
-            onChange={(e) =>
-              setPokemonName(
-                e.target.value
-              )
-            }
-            placeholder="Pokémon Name"
-            className="w-full mt-6 bg-zinc-800 border border-zinc-700 rounded-2xl px-4 py-3 text-center text-lg outline-none focus:border-pink-500"
-          />
-
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-8">
-
-          <button
-            onClick={() =>
-              setWeekendBoost(
-                !weekendBoost
-              )
-            }
-            className="bg-pink-600 rounded-2xl p-4 font-bold"
-          >
-            Weekend Boost:
-            {weekendBoost ? ' ON' : ' OFF'}
+            Toggle Shiny Sprite
           </button>
 
           <button
             onClick={() =>
-              setShinyCharm(
-                !shinyCharm
+              setShowSparkles(
+                !showSparkles
               )
             }
-            className="bg-pink-600 rounded-2xl p-4 font-bold"
+            className="
+              flex-1
+              bg-cyan-500
+              hover:bg-cyan-400
+              transition
+              rounded-2xl
+              py-4
+              font-bold
+              text-black
+            "
           >
-            Shiny Charm:
-            {shinyCharm ? ' ON' : ' OFF'}
-          </button>
-
-          <button
-            onClick={() =>
-              setShinyROPower(
-                !shinyROPower
-              )
-            }
-            className="bg-pink-600 rounded-2xl p-4 font-bold"
-          >
-            Shiny RO-Power:
-            {shinyROPower ? ' ON' : ' OFF'}
-          </button>
-
-          <button
-            onClick={() =>
-              setLegendaryROPower(
-                !legendaryROPower
-              )
-            }
-            className="bg-pink-600 rounded-2xl p-4 font-bold"
-          >
-            Legendary RO-Power:
-            {legendaryROPower ? ' ON' : ' OFF'}
+            Sparkles
           </button>
 
         </div>
 
         <button
           onClick={() =>
-            setIsRoaming(
-              !isRoaming
-            )
+            setIsRoaming(!isRoaming)
           }
-          className="w-full bg-blue-600 rounded-2xl py-4 text-xl font-bold mb-4"
+          className="
+            w-full
+            bg-blue-600
+            rounded-2xl
+            py-4
+            text-xl
+            font-bold
+            mb-6
+          "
         >
           {isRoaming
             ? 'Roaming Legendary Mode'
             : 'Static Encounter Mode'}
         </button>
 
-        <button
-          onClick={() =>
-            setTheme(
-              theme === 'dark'
-                ? 'light'
-                : 'dark'
-            )
-          }
-          className="w-full bg-purple-600 rounded-2xl py-4 text-xl font-bold mb-8"
-        >
-          Toggle Theme
-        </button>
-
-        <div className="w-full bg-zinc-700 rounded-full h-5 mb-8 overflow-hidden">
+        <div className="w-full bg-zinc-700 rounded-full h-5 overflow-hidden mb-8">
 
           <div
-            className="bg-pink-500 h-full transition-all"
+            className="bg-pink-500 h-full transition-all duration-300"
             style={{
               width: `${progress}%`
             }}
@@ -424,55 +470,72 @@ Phase ${phase}
 
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
 
-          <div className="bg-zinc-800 rounded-2xl p-5 text-center">
-            <p className="text-zinc-400 text-sm">
+          <div className="bg-zinc-800 rounded-2xl p-6 text-center">
+
+            <p className="text-zinc-400">
               Current Odds
             </p>
 
-            <h2 className="text-3xl font-bold mt-2">
+            <h2 className="text-4xl font-black mt-2">
               1 / {odds.toLocaleString()}
             </h2>
+
           </div>
 
-          <div className="bg-zinc-800 rounded-2xl p-5 text-center">
-            <p className="text-zinc-400 text-sm">
+          <div className="bg-zinc-800 rounded-2xl p-6 text-center">
+
+            <p className="text-zinc-400">
               Encounters
             </p>
 
-            <h2 className="text-5xl font-bold mt-2">
+            <h2 className="text-5xl font-black mt-2">
               {encounters}
             </h2>
+
           </div>
 
-          <div className="bg-zinc-800 rounded-2xl p-5 text-center">
-            <p className="text-zinc-400 text-sm">
+          <div className="bg-zinc-800 rounded-2xl p-6 text-center">
+
+            <p className="text-zinc-400">
               Chance By Now
             </p>
 
-            <h2 className="text-4xl font-bold mt-2">
+            <h2 className="text-4xl font-black mt-2">
               {percent}%
             </h2>
+
           </div>
 
-          <div className="bg-zinc-800 rounded-2xl p-5 text-center">
-            <p className="text-zinc-400 text-sm">
+          <div className="bg-zinc-800 rounded-2xl p-6 text-center">
+
+            <p className="text-zinc-400">
               Current Phase
             </p>
 
-            <h2 className="text-3xl font-bold mt-2">
+            <h2 className="text-4xl font-black mt-2">
               #{phase}
             </h2>
+
           </div>
 
         </div>
 
-        <div className="flex gap-3 mt-8">
+        <div className="flex gap-3 mb-4">
 
           <button
             onClick={incrementEncounter}
-            className="flex-1 bg-pink-600 rounded-2xl py-4 text-xl font-bold"
+            className="
+              flex-1
+              bg-pink-600
+              hover:bg-pink-500
+              transition
+              rounded-2xl
+              py-5
+              text-2xl
+              font-black
+            "
           >
             +1 Encounter
           </button>
@@ -480,28 +543,41 @@ Phase ${phase}
           <button
             onClick={() =>
               setEncounters(
-                Math.max(
-                  0,
-                  encounters - 1
-                )
+                Math.max(0, encounters - 1)
               )
             }
-            className="flex-1 bg-zinc-700 rounded-2xl py-4 text-xl font-bold"
+            className="
+              flex-1
+              bg-zinc-700
+              hover:bg-zinc-600
+              transition
+              rounded-2xl
+              py-5
+              text-2xl
+              font-black
+            "
           >
             -1
           </button>
 
         </div>
 
-        <div className="flex gap-3 mt-4">
+        <div className="flex gap-3">
 
           <button
             onClick={() =>
-              setPhase(
-                phase + 1
-              )
+              setPhase(phase + 1)
             }
-            className="flex-1 bg-yellow-600 rounded-2xl py-4 text-lg font-bold"
+            className="
+              flex-1
+              bg-yellow-500
+              hover:bg-yellow-400
+              transition
+              rounded-2xl
+              py-4
+              font-bold
+              text-black
+            "
           >
             Next Phase
           </button>
@@ -510,116 +586,52 @@ Phase ${phase}
             onClick={() =>
               setEncounters(0)
             }
-            className="flex-1 bg-red-700 rounded-2xl py-4 text-lg font-bold"
+            className="
+              flex-1
+              bg-red-600
+              hover:bg-red-500
+              transition
+              rounded-2xl
+              py-4
+              font-bold
+            "
           >
-            Reset Counter
-          </button>
-
-        </div>
-
-        <div className="mt-8 bg-zinc-800 rounded-2xl p-5">
-
-          <p className="text-zinc-400 text-sm mb-2">
-            Hunt Notes
-          </p>
-
-          <textarea
-            value={huntNotes}
-            onChange={(e) =>
-              setHuntNotes(
-                e.target.value
-              )
-            }
-            placeholder="Write hunt notes..."
-            className="w-full h-28 rounded-2xl bg-zinc-900 border border-zinc-700 p-4 resize-none"
-          />
-
-        </div>
-
-        <div className="mt-8 bg-zinc-800 rounded-2xl p-5">
-
-          <div className="flex items-center justify-between mb-4">
-
-            <p className="text-zinc-400 text-sm">
-              Encounter Graph
-            </p>
-
-            <button
-              onClick={() =>
-                setShowGraph(
-                  !showGraph
-                )
-              }
-              className="bg-blue-600 px-4 py-2 rounded-xl font-bold"
-            >
-              {showGraph
-                ? 'Hide'
-                : 'Show'}
-            </button>
-
-          </div>
-
-          {showGraph && (
-
-            <div className="flex items-end gap-1 h-40 overflow-x-auto">
-
-              {encounterHistory
-                .slice(-50)
-                .map((value, index) => (
-
-                <div
-                  key={index}
-                  className="bg-pink-500 min-w-[6px] rounded-t"
-                  style={{
-                    height: `${
-                      Math.max(
-                        8,
-                        value /
-                        Math.max(
-                          ...(encounterHistory.length
-                            ? encounterHistory
-                            : [1])
-                        ) * 100
-                      )
-                    }%`
-                  }}
-                />
-
-              ))}
-
-            </div>
-
-          )}
-
-        </div>
-
-        <div className="flex gap-3 mt-6">
-
-          <button
-            onClick={exportHuntCard}
-            className="flex-1 bg-green-600 rounded-2xl py-4 text-lg font-bold"
-          >
-            Share Hunt Card
-          </button>
-
-          <button
-            onClick={fakeCloudSave}
-            className="flex-1 bg-cyan-600 rounded-2xl py-4 text-lg font-bold"
-          >
-            Cloud Save
+            Reset
           </button>
 
         </div>
 
         <button
           onClick={shinySimulator}
-          className="w-full mt-4 bg-yellow-500 rounded-2xl py-4 text-lg font-bold text-black"
+          className="
+            w-full
+            mt-6
+            bg-green-500
+            hover:bg-green-400
+            transition
+            rounded-2xl
+            py-5
+            text-2xl
+            font-black
+            text-black
+          "
         >
           🎰 Shiny Simulator
         </button>
 
-        <div className="mt-8 text-center text-zinc-600 text-sm">
-          Created by Ren • Discord: @they_call_me_ren • Instagram: @they_call_metarun
+        <div className="mt-8 text-center text-zinc-500 text-sm">
+
+          Created by Ren
+          <br/>
+
+          Discord:
+          @they_call_me_ren
+
+          <br/>
+
+          Instagram:
+          @they_call_metarun
+
         </div>
 
       </div>
