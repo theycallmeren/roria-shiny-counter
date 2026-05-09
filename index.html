@@ -4,7 +4,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>Roria Shiny Counter</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
@@ -38,6 +37,10 @@ function App() {
   })
 
   const [theme, setTheme] = React.useState("dark")
+
+  const [hunts, setHunts] = React.useState(() => {
+    return JSON.parse(localStorage.getItem("rc-hunts")) || []
+  })
 
   const [weekendBoost, setWeekendBoost] = React.useState(true)
   const [shinyCharm, setShinyCharm] = React.useState(true)
@@ -102,6 +105,26 @@ function App() {
   const progress =
     Math.min((encounters / odds) * 100, 100)
 
+  function saveCurrentHunt() {
+
+    const newHunt = {
+      pokemon: pokemonName,
+      encounters,
+      phase,
+      odds,
+      date: new Date().toLocaleString()
+    }
+
+    const updated = [...hunts, newHunt]
+
+    setHunts(updated)
+
+    localStorage.setItem(
+      "rc-hunts",
+      JSON.stringify(updated)
+    )
+  }
+
   return (
 
     <div className={
@@ -110,7 +133,7 @@ function App() {
       : "min-h-screen bg-white text-black flex items-center justify-center p-6"
     }>
 
-      <div className="w-full max-w-3xl bg-zinc-900 rounded-3xl shadow-2xl p-8 border border-zinc-700">
+      <div className="w-full max-w-4xl bg-zinc-900 rounded-3xl shadow-2xl p-8 border border-zinc-700">
 
         <div className="text-center mb-8">
 
@@ -143,28 +166,28 @@ function App() {
 
           <button
             onClick={() => setWeekendBoost(!weekendBoost)}
-            className="bg-pink-600 rounded-2xl p-4"
+            className="bg-pink-600 rounded-2xl p-4 font-bold"
           >
             Weekend Boost: {weekendBoost ? "ON" : "OFF"}
           </button>
 
           <button
             onClick={() => setShinyCharm(!shinyCharm)}
-            className="bg-pink-600 rounded-2xl p-4"
+            className="bg-pink-600 rounded-2xl p-4 font-bold"
           >
             Shiny Charm: {shinyCharm ? "ON" : "OFF"}
           </button>
 
           <button
             onClick={() => setShinyROPower(!shinyROPower)}
-            className="bg-pink-600 rounded-2xl p-4"
+            className="bg-pink-600 rounded-2xl p-4 font-bold"
           >
             Shiny RO-Power: {shinyROPower ? "ON" : "OFF"}
           </button>
 
           <button
             onClick={() => setLegendaryROPower(!legendaryROPower)}
-            className="bg-pink-600 rounded-2xl p-4"
+            className="bg-pink-600 rounded-2xl p-4 font-bold"
           >
             Legendary RO-Power: {legendaryROPower ? "ON" : "OFF"}
           </button>
@@ -188,16 +211,20 @@ function App() {
         </button>
 
         <div className="w-full bg-zinc-700 rounded-full h-5 mb-8 overflow-hidden">
+
           <div
-            className="bg-pink-500 h-full"
+            className="bg-pink-500 h-full transition-all"
             style={{ width: `${progress}%` }}
           />
+
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
           <div className="bg-zinc-800 rounded-2xl p-5 text-center">
-            <p className="text-zinc-400 text-sm">Current Odds</p>
+            <p className="text-zinc-400 text-sm">
+              Current Odds
+            </p>
 
             <h2 className="text-3xl font-bold mt-2">
               1 / {odds.toLocaleString()}
@@ -205,7 +232,9 @@ function App() {
           </div>
 
           <div className="bg-zinc-800 rounded-2xl p-5 text-center">
-            <p className="text-zinc-400 text-sm">Current Hunt</p>
+            <p className="text-zinc-400 text-sm">
+              Current Hunt
+            </p>
 
             <h2 className="text-3xl font-bold mt-2">
               ✨ {pokemonName} ✨
@@ -213,7 +242,9 @@ function App() {
           </div>
 
           <div className="bg-zinc-800 rounded-2xl p-5 text-center">
-            <p className="text-zinc-400 text-sm">Encounters</p>
+            <p className="text-zinc-400 text-sm">
+              Encounters
+            </p>
 
             <h2 className="text-5xl font-bold mt-2">
               {encounters}
@@ -267,6 +298,56 @@ function App() {
           >
             Reset Counter
           </button>
+
+        </div>
+
+        <button
+          onClick={saveCurrentHunt}
+          className="w-full mt-4 bg-green-600 rounded-2xl py-4 text-lg font-bold"
+        >
+          Save Hunt
+        </button>
+
+        <div className="mt-8">
+
+          <h2 className="text-2xl font-bold mb-4">
+            Saved Hunts
+          </h2>
+
+          <div className="space-y-3">
+
+            {hunts.map((hunt, index) => (
+
+              <div
+                key={index}
+                className="bg-zinc-800 rounded-2xl p-4"
+              >
+
+                <div className="font-bold text-lg">
+                  ✨ {hunt.pokemon}
+                </div>
+
+                <div className="mt-1">
+                  Encounters: {hunt.encounters}
+                </div>
+
+                <div>
+                  Odds: 1 / {hunt.odds.toLocaleString()}
+                </div>
+
+                <div>
+                  Phase: {hunt.phase}
+                </div>
+
+                <div className="text-sm text-zinc-400 mt-2">
+                  {hunt.date}
+                </div>
+
+              </div>
+
+            ))}
+
+          </div>
 
         </div>
 
