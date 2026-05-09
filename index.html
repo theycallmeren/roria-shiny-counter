@@ -334,7 +334,7 @@ Phase ${phase}
                   key={index}
                   className="bg-pink-500 min-w-[6px] rounded-t"
                   style={{
-                    height: `${Math.max(8, value / Math.max(...encounterHistory) * 100)}%`
+                    height: `${Math.max(8, value / Math.max(...(encounterHistory.length ? encounterHistory : [1])) * 100)}%`
                   }}
                 />
               ))}
